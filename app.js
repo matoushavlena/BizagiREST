@@ -9,29 +9,32 @@ app.set('port', port);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var slot = {};
-var labs = {};
-labs["Yorktown"] = true;
-slot["2015-01-01"] = true;
-
-app.get('/isAvailable/:lab/:timestamp', function(req, res) {
-	res.send(200);
-	/*if (!labs.hasOwnProperty(req.params.lab)) res.send(503);
-	else {
-		var timestamp = Date.parse(req.params.timestamp)
-		if (isNaN(timestamp)==false) {
-		    var d = new Date(timestamp);
-		    res.send("ok");
-		} else {
-			res.send(503);
-		}
-	}*/
+app.use(function(req, res, next) {
+    console.log(req.originalUrl);
+    next();
 });
 
-app.post('/session/login', function(req, res) {
+var dayslots = {};
+dayslots["Yorktown"] = {};
+dayslots["Tokyo"] = {};
+dayslots["Haifa"] = {};
+dayslots["Zurich"] = {};
+dayslots["Almaden"] = {};
+dayslots["Nairobi"] = {};
+dayslots["Beijing"] = {};
+dayslots["Sydney"] = {};
+dayslots["Yorktown"]["01-01-2015"] = true;
 
+app.get('/isAvailable/:lab/:month/:day/:year', function(req, res) {
+	res.setHeader('Content-Type', 'application/json');
+	if (dayslots.hasOwnProperty(req.params.lab)) {
+		var date = req.params.month+"-"+req.params.day+"-"+req.params.year;
+		if (dayslots[req.params.lab].hasOwnProperty(date)) res.end(JSON.stringify({available: false}));
+		else res.end(JSON.stringify({available: true}));
+	} else res.send(503);
 });
 
 server.listen(port, function(){  
 	console.log('Express server listening on port '+ port);
 });
+
