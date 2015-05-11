@@ -25,12 +25,30 @@ dayslots["Beijing"] = {};
 dayslots["Sydney"] = {};
 dayslots["Yorktown"]["01-01-2015"] = true;
 
-app.get('/isAvailable/:lab/:month/:day/:year', function(req, res) {
+app.get('/isAvailable/:lab/:date', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	if (dayslots.hasOwnProperty(req.params.lab)) {
-		var date = req.params.month+"-"+req.params.day+"-"+req.params.year;
+		var date = req.params.date;
 		if (dayslots[req.params.lab].hasOwnProperty(date)) res.end(JSON.stringify({available: false}));
 		else res.end(JSON.stringify({available: true}));
+	} else res.send(503);
+});
+
+app.get('/reserve/:lab/:date', function(req, res) {
+	res.setHeader('Content-Type', 'application/json');
+	if (dayslots.hasOwnProperty(req.params.lab)) {
+		var date = req.params.date;
+		dayslots[req.params.lab][date] = true;
+		res.end(JSON.stringify({success: true}));
+	} else res.send(503);
+});
+
+app.get('/cancelReservation/:lab/:date', function(req, res) {
+	res.setHeader('Content-Type', 'application/json');
+	if (dayslots.hasOwnProperty(req.params.lab)) {
+		var date = req.params.date;
+		delete dayslots[req.params.lab][date];
+		res.end(JSON.stringify({success: true}));
 	} else res.send(503);
 });
 
