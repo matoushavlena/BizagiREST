@@ -25,7 +25,7 @@ dayslots["Beijing"] = {};
 dayslots["Sydney"] = {};
 dayslots["Yorktown"]["01-01-2015"] = true;
 
-app.get('/isAvailable/:lab/:date', function(req, res) {
+app.get('/reservations/isAvailable/:lab/:date', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	if (dayslots.hasOwnProperty(req.params.lab)) {
 		var date = req.params.date;
@@ -34,26 +34,26 @@ app.get('/isAvailable/:lab/:date', function(req, res) {
 	} else res.send(503);
 });
 
-app.get('/reserve/:lab/:date', function(req, res) {
+app.post('/reservations', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
-	if (dayslots.hasOwnProperty(req.params.lab)) {
-		var date = req.params.date;
-		dayslots[req.params.lab][date] = true;
-		res.end(JSON.stringify({success: true}));
+	if (dayslots.hasOwnProperty(req.body.data.lab)) {
+		var date = req.body.data.date;
+		dayslots[req.body.data.lab][date] = true;
+		res.end(JSON.stringify({success: true, reservationId: req.body.data.lab+"#"+date}));
 	} else res.send(503);
 });
 
-app.get('/cancelReservation/:lab/:date', function(req, res) {
+app.delete('/reservations/:reservationId', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
-	if (dayslots.hasOwnProperty(req.params.lab)) {
-		var date = req.params.date;
-		delete dayslots[req.params.lab][date];
+	var data = req.params.reservationId.split("#");
+	if (dayslots.hasOwnProperty(data[0])) {
+		delete dayslots[data[0]][data[1]];
 		res.end(JSON.stringify({success: true}));
 	} else res.send(503);
 });
 
 var projects = {};
-app.post('/registerProject', function(req, res) {
+app.post('/projects', function(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	projects[req.body.data.code] = req.body;
 	res.end(JSON.stringify({success: true}));
